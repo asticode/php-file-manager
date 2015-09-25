@@ -1,0 +1,25 @@
+{
+  "name": "asticode/php-file-manager",
+  "type": "library",
+  "description": "",
+  "keywords": ["php","file","manager","ftp","unix"],
+  "homepage": "https://github.com/asticode/php-file-manager",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Quentin RENARD",
+      "email": "contact@asticode.com",
+      "homepage": "http://asticode.com",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "php": ">=5.3.0",
+    "asticode/php-toolbox": "dev-master"
+  },
+  "autoload": {
+    "psr-4": {
+      "Asticode\\FileManager\\": "src/"
+    }
+  }
+}

@@ -1,7 +1,7 @@
 {
   "name": "asticode/php-file-manager",
   "type": "library",
-  "description": "",
+  "description": "File manager to handle cross-datasources copy as well as simple file actions on the most common datasources",
   "keywords": ["php","file","manager","ftp","unix"],
   "homepage": "https://github.com/asticode/php-file-manager",
   "license": "MIT",

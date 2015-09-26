@@ -138,6 +138,11 @@ class UNIXHandler extends AbstractHandler
             $this->escapeSingleQuotes($sPath)
         )));
 
+        // Remove total
+        if (isset($aList[0]) && preg_match('/^total[\s]+[0-9]+/', $aList[0]) > 0) {
+            array_shift($aList);
+        }
+
         // Add file
         foreach ($aList as $sFile) {
             // Initialize

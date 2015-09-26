@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "e8a49bd3dec0b1d07f64170b29b74a38",
+    "hash": "b832a7f4500307537917f963c4c9da3a",
     "packages": [
         {
             "name": "asticode/php-toolbox",
-            "version": "v1.0.0",
+            "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/asticode/php-toolbox.git",
-                "reference": "522413f6f5d837ede902c23ac8d63139d1e1cbf1"
+                "reference": "9cf1befa00d58a51343193911f189f4dfe4eef8c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/asticode/php-toolbox/zipball/522413f6f5d837ede902c23ac8d63139d1e1cbf1",
-                "reference": "522413f6f5d837ede902c23ac8d63139d1e1cbf1",
+                "url": "https://api.github.com/repos/asticode/php-toolbox/zipball/9cf1befa00d58a51343193911f189f4dfe4eef8c",
+                "reference": "9cf1befa00d58a51343193911f189f4dfe4eef8c",
                 "shasum": ""
             },
             "require": {
@@ -50,13 +50,15 @@
                 "shell",
                 "string"
             ],
-            "time": "2015-09-25 19:35:19"
+            "time": "2015-09-26 06:48:50"
         }
     ],
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "asticode/php-toolbox": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

@@ -1,0 +1,66 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "This file is @generated automatically"
+    ],
+    "hash": "e8a49bd3dec0b1d07f64170b29b74a38",
+    "packages": [
+        {
+            "name": "asticode/php-toolbox",
+            "version": "v1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/asticode/php-toolbox.git",
+                "reference": "522413f6f5d837ede902c23ac8d63139d1e1cbf1"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/asticode/php-toolbox/zipball/522413f6f5d837ede902c23ac8d63139d1e1cbf1",
+                "reference": "522413f6f5d837ede902c23ac8d63139d1e1cbf1",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Asticode\\Toolbox\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Quentin RENARD",
+                    "email": "contact@asticode.com",
+                    "homepage": "http://asticode.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Static methods to ease PHP developments",
+            "homepage": "https://github.com/asticode/php-toolbox",
+            "keywords": [
+                "Toolbox",
+                "array",
+                "php",
+                "shell",
+                "string"
+            ],
+            "time": "2015-09-25 19:35:19"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": [],
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": {
+        "php": ">=5.3.0"
+    },
+    "platform-dev": []
+}

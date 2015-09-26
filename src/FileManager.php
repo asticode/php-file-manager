@@ -181,7 +181,7 @@ class FileManager
         $oHandler = $this->getHandler($sHandlerName);
 
         // Execute
-        $oHandler->searchPattern($sPattern, $sPath);
+        return $oHandler->searchPattern($sPattern, $sPath);
     }
 
     public function write($sContent, $sPath, $iWriteMethod = WriteMethod::APPEND)
@@ -203,7 +203,7 @@ class FileManager
         $oHandler = $this->getHandler($sHandlerName);
 
         // Execute
-        $oHandler->read($sPath);
+        return $oHandler->read($sPath);
     }
 
     public function rename($sSourcePath, $sTargetPath)

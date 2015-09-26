@@ -21,7 +21,7 @@
   ],
   "require": {
     "php": ">=5.3.0",
-    "asticode/php-toolbox": "^1.0.0"
+    "asticode/php-toolbox": "dev-master"
   },
   "autoload": {
     "psr-4": {

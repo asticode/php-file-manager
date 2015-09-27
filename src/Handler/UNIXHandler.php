@@ -68,21 +68,12 @@ class UNIXHandler extends AbstractHandler
     {
         // Execute
         list (
-            $aOutputArray,
-            $aErrorArray
-        ) = ExtendedShell::exec($sCommand, $this->aConfig['timeout']);
-
-        // Error
-        if (!empty($aErrorArray)) {
-            throw new RuntimeException(sprintf(
-                'Error while executing %s => %s',
-                $sCommand,
-                implode("\n", $aErrorArray)
-            ));
-        }
+            $aStdOut,
+            $aStdErr
+        ) = ExtendedShell::exec($sCommand, $this->aConfig['timeout'], true);
 
         // Return
-        return $aOutputArray;
+        return array_merge($aStdOut, $aStdErr);
     }
 
     public function metadata($sPath)
@@ -93,16 +84,8 @@ class UNIXHandler extends AbstractHandler
             $this->escapeSingleQuotes($sPath)
         ));
 
-        // Parse
-        try {
-            return $this->parseRawList(isset($aOutputArray[0]) ? $aOutputArray[0] : '', dirname($sPath));
-        } catch (RuntimeException $oException) {
-            throw new RuntimeException(sprintf(
-                'Path %s doesn\'t exist with message %s',
-                $sPath,
-                $oException->getMessage()
-            ));
-        }
+        // Return
+        return $this->parseRawList(isset($aOutputArray[0]) ? $aOutputArray[0] : '', dirname($sPath));
     }
 
     public function createDir($sPath)

@@ -67,13 +67,11 @@ class UNIXHandler extends AbstractHandler
     private function exec($sCommand)
     {
         // Execute
-        list (
-            $aStdOut,
-            $aStdErr
-        ) = ExtendedShell::exec($sCommand, $this->aConfig['timeout']);
+        $aOutput = [];
+        ExtendedShell::exec($sCommand, $aOutput, $this->aConfig['timeout']);
 
         // Return
-        return array_merge($aStdOut, $aStdErr);
+        return $aOutput;
     }
 
     public function metadata($sPath)

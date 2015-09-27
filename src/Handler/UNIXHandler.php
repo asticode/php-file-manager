@@ -68,34 +68,34 @@ class UNIXHandler extends AbstractHandler
     {
         // Execute
         list (
-            $sOutputContent,
-            $sErrorContent
+            $aOutputArray,
+            $aErrorArray
         ) = ExtendedShell::exec($sCommand, $this->aConfig['timeout']);
 
         // Error
-        if (!empty($sErrorContent)) {
+        if (!empty($aErrorArray)) {
             throw new RuntimeException(sprintf(
                 'Error while executing %s => %s',
                 $sCommand,
-                $sErrorContent
+                implode("\n", $aErrorArray)
             ));
         }
 
         // Return
-        return $sOutputContent;
+        return $aOutputArray;
     }
 
     public function metadata($sPath)
     {
         // Execute
-        $sOutput = $this->exec(sprintf(
+        $aOutputArray = $this->exec(sprintf(
             'ls -dl \'%s\'',
             $this->escapeSingleQuotes($sPath)
         ));
 
         // Parse
         try {
-            return $this->parseRawList($sOutput, dirname($sPath));
+            return $this->parseRawList(isset($aOutputArray[0]) ? $aOutputArray[0] : '', dirname($sPath));
         } catch (RuntimeException $oException) {
             throw new RuntimeException(sprintf(
                 'Path %s doesn\'t exist with message %s',
@@ -108,7 +108,7 @@ class UNIXHandler extends AbstractHandler
     public function createDir($sPath)
     {
         // Execute
-        return $this->exec(sprintf(
+        $this->exec(sprintf(
             'mkdir -p \'%s\'',
             $this->escapeSingleQuotes($sPath)
         ));
@@ -117,7 +117,7 @@ class UNIXHandler extends AbstractHandler
     public function createFile($sPath)
     {
         // Execute
-        return $this->exec(sprintf(
+        $this->exec(sprintf(
             'touch \'%s\'',
             $this->escapeSingleQuotes($sPath)
         ));
@@ -133,10 +133,10 @@ class UNIXHandler extends AbstractHandler
         $aFiles = [];
 
         // Get files
-        $aList = explode("\n", $this->exec(sprintf(
+        $aList = $this->exec(sprintf(
             'ls -l \'%s\'',
             $this->escapeSingleQuotes($sPath)
-        )));
+        ));
 
         // Remove total
         if (isset($aList[0]) && preg_match('/^total[\s]+[0-9]+/', $aList[0]) > 0) {
@@ -173,7 +173,7 @@ class UNIXHandler extends AbstractHandler
         }
 
         // Execute
-        return $this->exec(sprintf(
+        $this->exec(sprintf(
             'echo \'%s\' %s \'%s\'',
             $this->escapeSingleQuotes($sContent),
             $sOperator,
@@ -184,16 +184,16 @@ class UNIXHandler extends AbstractHandler
     public function read($sPath)
     {
         // Execute
-        return $this->exec(sprintf(
+        return implode("\n", $this->exec(sprintf(
             'cat \'%s\'',
             $this->escapeSingleQuotes($sPath)
-        ));
+        )));
     }
 
     public function rename($sSourcePath, $sTargetPath)
     {
         // Execute
-        return $this->exec(sprintf(
+        $this->exec(sprintf(
             'mv \'%s\' \'%s\'',
             $this->escapeSingleQuotes($sSourcePath),
             $this->escapeSingleQuotes($sSourcePath)
@@ -203,7 +203,7 @@ class UNIXHandler extends AbstractHandler
     public function delete($sPath)
     {
         // Execute
-        return $this->exec(sprintf(
+        $this->exec(sprintf(
             'rm -rf \'%s\'',
             $this->escapeSingleQuotes($sPath)
         ));
@@ -212,7 +212,7 @@ class UNIXHandler extends AbstractHandler
     public function copy($sSourcePath, $sTargetPath)
     {
         // Execute
-        return $this->exec(sprintf(
+        $this->exec(sprintf(
             'cp \'%s\' \'%s\'',
             $this->escapeSingleQuotes($sSourcePath),
             $this->escapeSingleQuotes($sTargetPath)

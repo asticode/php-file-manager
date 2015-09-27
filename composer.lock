@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/asticode/php-toolbox.git",
-                "reference": "9cf1befa00d58a51343193911f189f4dfe4eef8c"
+                "reference": "f5327083cf75510b9d707db48c41cb0b7c876861"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/asticode/php-toolbox/zipball/9cf1befa00d58a51343193911f189f4dfe4eef8c",
-                "reference": "9cf1befa00d58a51343193911f189f4dfe4eef8c",
+                "url": "https://api.github.com/repos/asticode/php-toolbox/zipball/f5327083cf75510b9d707db48c41cb0b7c876861",
+                "reference": "f5327083cf75510b9d707db48c41cb0b7c876861",
                 "shasum": ""
             },
             "require": {
@@ -50,7 +50,7 @@
                 "shell",
                 "string"
             ],
-            "time": "2015-09-26 06:48:50"
+            "time": "2015-09-27 10:02:21"
         }
     ],
     "packages-dev": [],

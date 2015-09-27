@@ -196,7 +196,7 @@ class UNIXHandler extends AbstractHandler
     {
         // Execute
         $this->exec(sprintf(
-            'cp \'%s\' \'%s\'',
+            'cp -r \'%s\' \'%s\'',
             $this->escapeSingleQuotes($sSourcePath),
             $this->escapeSingleQuotes($sTargetPath)
         ));

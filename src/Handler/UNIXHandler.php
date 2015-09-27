@@ -70,7 +70,7 @@ class UNIXHandler extends AbstractHandler
         list (
             $aStdOut,
             $aStdErr
-        ) = ExtendedShell::exec($sCommand, $this->aConfig['timeout'], true);
+        ) = ExtendedShell::exec($sCommand, $this->aConfig['timeout']);
 
         // Return
         return array_merge($aStdOut, $aStdErr);

@@ -16,7 +16,8 @@ abstract class AbstractHandler implements HandlerInterface
 
     protected static function parseRawList($sFile, $sPath)
     {
-        // drwxr-xr-x 2 zmifwezd zmifwezd 4096 Sep 22 14:45 .
+        // UNIX => drwxr-xr-x 2 zmifwezd zmifwezd 4096 Sep 22 14:45 .
+        // OSX  => drwxr-xr-x 2 zmifwezd zmifwezd 4096 22 sep 14:45 .
         // Split file
         $aExplodedRawListOutput = preg_split('/\s+/', $sFile);
 
@@ -30,6 +31,13 @@ abstract class AbstractHandler implements HandlerInterface
 
         // Parse raw list output
         list($sRights, $iNumber, $sUser, $sGroup, $iSize, $sMonth, $sDay, $sTime, $sName) = $aExplodedRawListOutput;
+
+        // Switch month and day for OSX
+        if (intval($sDay) === 0) {
+            $sTemp = $sMonth;
+            $sMonth = $sDay;
+            $sDay = $sTemp;
+        }
 
         // Get modification date
         $sModificationDate = sprintf(

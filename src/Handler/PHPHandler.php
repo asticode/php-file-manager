@@ -9,7 +9,7 @@ use Asticode\FileManager\Enum\OrderField;
 use Asticode\FileManager\Enum\WriteMethod;
 use RuntimeException;
 
-class Handler extends AbstractHandler
+class PHPHandler extends AbstractHandler
 {
     // Attributes
     private $aConfig;

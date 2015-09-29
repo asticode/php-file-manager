@@ -129,12 +129,8 @@ class UNIXHandler extends AbstractHandler
             // Initialize
             $oFile = self::parseRawList($sFile, $sPath);
 
-            // Check extension
-            if (!in_array($oFile->getBasename(), ['.', '..'])) {
-                if ($aAllowedExtensions === [] || in_array($oFile->getExtension(), $aAllowedExtensions)) {
-                    $aFiles[] = $oFile;
-                }
-            }
+            // Filter file
+            $this->filterFile($aFiles, $oFile, $aAllowedExtensions);
         }
 
         // Order

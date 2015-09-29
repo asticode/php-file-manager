@@ -103,10 +103,8 @@ class PHPHandler extends AbstractHandler
                 $sBasename
             ));
 
-            // Check extension
-            if ($aAllowedExtensions === [] || in_array($oFile->getExtension(), $aAllowedExtensions)) {
-                $aFiles[] = $oFile;
-            }
+            // Filter file
+            $this->filterFile($aFiles, $oFile, $aAllowedExtensions);
         }
 
         // Order

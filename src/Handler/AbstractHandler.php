@@ -102,6 +102,15 @@ abstract class AbstractHandler implements HandlerInterface
         }
     }
 
+    protected function filterFile(array &$aFiles, File $oFile, array $aAllowedExtensions)
+    {
+        if (!in_array($oFile->getBasename(), ['.', '..'])) {
+            if ($aAllowedExtensions === [] || in_array($oFile->getExtension(), $aAllowedExtensions)) {
+                $aFiles[] = $oFile;
+            }
+        }
+    }
+
     public function exists($sPath)
     {
         // Metadata

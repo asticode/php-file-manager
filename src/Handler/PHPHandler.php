@@ -60,7 +60,14 @@ class PHPHandler extends AbstractHandler
 
     public function createDir($sPath)
     {
-        mkdir($sPath);
+        $bSuccess = mkdir($sPath);
+
+        if (!$bSuccess) {
+            throw new RuntimeException(sprintf(
+                'Error while creating directory %s',
+                $sPath
+            ));
+        }
     }
 
     public function createFile($sPath)
@@ -79,6 +86,13 @@ class PHPHandler extends AbstractHandler
 
         // Get files
         $aList = scandir($sPath);
+
+        if (!$aList) {
+            throw new RuntimeException(sprintf(
+                'Error while exploring %s',
+                $sPath
+            ));
+        }
 
         // Add file
         foreach ($aList as $sBasename) {
@@ -106,33 +120,73 @@ class PHPHandler extends AbstractHandler
     {
         // Execute
         if ($iWriteMethod === WriteMethod::APPEND) {
-            file_put_contents($sPath, $sContent, FILE_APPEND);
+            $bSuccess = file_put_contents($sPath, $sContent, FILE_APPEND);
         } else {
-            file_put_contents($sPath, $sContent);
+            $bSuccess = file_put_contents($sPath, $sContent);
+        }
+
+        if (!$bSuccess) {
+            throw new RuntimeException(sprintf(
+                'Error while writing to %s',
+                $sPath
+            ));
         }
     }
 
     public function read($sPath)
     {
         // Return
-        return file_get_contents($sPath);
+        $sResult = file_get_contents($sPath);
+
+        if (!$sResult) {
+            throw new RuntimeException(sprintf(
+                'Error while reading %s',
+                $sPath
+            ));
+        }
+
+        // Return
+        return $sResult;
     }
 
     public function rename($sSourcePath, $sTargetPath)
     {
         // Execute
-        rename($sSourcePath, $sTargetPath);
+        $bSuccess = rename($sSourcePath, $sTargetPath);
+
+        if (!$bSuccess) {
+            throw new RuntimeException(sprintf(
+                'Error while renaming %s to %s',
+                $sSourcePath,
+                $sTargetPath
+            ));
+        }
     }
 
     public function delete($sPath)
     {
         // Execute
-        unlink($sPath);
+        $bSuccess = unlink($sPath);
+
+        if (!$bSuccess) {
+            throw new RuntimeException(sprintf(
+                'Error while deleting %s',
+                $sPath
+            ));
+        }
     }
 
     public function copy($sSourcePath, $sTargetPath)
     {
         // Execute
-        copy($sSourcePath, $sTargetPath);
+        $bSuccess = copy($sSourcePath, $sTargetPath);
+
+        if (!$bSuccess) {
+            throw new RuntimeException(sprintf(
+                'Error while copying %s to %s',
+                $sSourcePath,
+                $sTargetPath
+            ));
+        }
     }
 }

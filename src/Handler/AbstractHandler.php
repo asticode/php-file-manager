@@ -4,6 +4,7 @@ namespace Asticode\FileManager\Handler;
 use Asticode\FileManager\Entity\File;
 use Asticode\FileManager\Enum\OrderDirection;
 use Asticode\FileManager\Enum\OrderField;
+use Asticode\Toolbox\ExtendedString;
 use RuntimeException;
 
 abstract class AbstractHandler implements HandlerInterface
@@ -102,13 +103,39 @@ abstract class AbstractHandler implements HandlerInterface
         }
     }
 
-    protected function filterFile(array &$aFiles, File $oFile, array $aAllowedExtensions)
+    protected function filterFile(array &$aFiles, File $oFile, array $aAllowedExtensions, array $aAllowedPatterns)
     {
-        if (!in_array($oFile->getBasename(), ['.', '..'])) {
-            if ($aAllowedExtensions === [] || in_array($oFile->getExtension(), $aAllowedExtensions)) {
-                $aFiles[] = $oFile;
+        // Do not process . and ..
+        if (in_array($oFile->getBasename(), ['.', '..'])) {
+            return;
+        }
+
+        // Filter allowed extensions
+        if ($aAllowedExtensions !== [] and !in_array($oFile->getExtension(), $aAllowedExtensions)) {
+            return;
+        }
+
+        // Filter allowed patterns
+        if ($aAllowedPatterns !== []) {
+            // Initialize
+            $bIsValid = false;
+
+            // Loop through allowed patterns
+            foreach ($aAllowedPatterns as $sAllowedPattern) {
+                $sPattern = sprintf('/%s/', ExtendedString::pregQuote($sAllowedPattern));
+                if (preg_match($sPattern, $oFile->getBasename()) > 0) {
+                    $bIsValid = true;
+                }
+            }
+
+            // Invalid
+            if (!$bIsValid) {
+                return;
             }
         }
+
+        // Add file
+        $aFiles[] = $oFile;
     }
 
     public function exists($sPath)

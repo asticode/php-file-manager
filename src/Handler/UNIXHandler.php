@@ -108,7 +108,8 @@ class UNIXHandler extends AbstractHandler
         $sPath,
         $iOrderField = OrderField::NONE,
         $iOrderDirection = OrderDirection::ASC,
-        array $aAllowedExtensions = []
+        array $aAllowedExtensions = [],
+        array $aAllowedPatterns = []
     ) {
         // Initialize
         $aFiles = [];
@@ -130,7 +131,7 @@ class UNIXHandler extends AbstractHandler
             $oFile = self::parseRawList($sFile, $sPath);
 
             // Filter file
-            $this->filterFile($aFiles, $oFile, $aAllowedExtensions);
+            $this->filterFile($aFiles, $oFile, $aAllowedExtensions, $aAllowedPatterns);
         }
 
         // Order

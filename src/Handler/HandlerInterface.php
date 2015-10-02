@@ -45,13 +45,15 @@ interface HandlerInterface
      * @param int $iOrderField
      * @param int $iOrderDirection
      * @param array $aAllowedExtensions
+     * @param array $sPattern
      * @return array
      */
     public function explore(
         $sPath,
         $iOrderField = OrderField::NONE,
         $iOrderDirection = OrderDirection::ASC,
-        array $aAllowedExtensions = []
+        array $aAllowedExtensions = [],
+        array $aAllowedPatterns = []
     );
 
     /**

@@ -4,7 +4,6 @@ namespace Asticode\FileManager\Handler;
 use Asticode\FileManager\Entity\File;
 use Asticode\FileManager\Enum\OrderDirection;
 use Asticode\FileManager\Enum\OrderField;
-use Asticode\Toolbox\ExtendedString;
 use RuntimeException;
 
 abstract class AbstractHandler implements HandlerInterface
@@ -122,8 +121,7 @@ abstract class AbstractHandler implements HandlerInterface
 
             // Loop through allowed patterns
             foreach ($aAllowedPatterns as $sAllowedPattern) {
-                $sPattern = sprintf('/%s/', ExtendedString::pregQuote($sAllowedPattern));
-                if (preg_match($sPattern, $oFile->getBasename()) > 0) {
+                if (preg_match(sprintf('/%s/', $sAllowedPattern), $oFile->getBasename()) > 0) {
                     $bIsValid = true;
                 }
             }

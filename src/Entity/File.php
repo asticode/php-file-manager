@@ -38,25 +38,26 @@ class File
     public function getExtension()
     {
         $aExplodedFilename = explode('.', $this->getBasename());
-        return ExtendedArray::getLastValue($aExplodedFilename);
+        return count($aExplodedFilename) > 1 ? ExtendedArray::getLastValue($aExplodedFilename) : '';
+    }
+
+    public static function removeExtension($sInput)
+    {
+        $aExplodedInput = explode('.', $sInput);
+        if (count($aExplodedInput) > 1) {
+            array_pop($aExplodedInput);
+        }
+        return implode('.', $aExplodedInput);
     }
 
     public function getPathWithoutExtension()
     {
-        $aExplodedFilename = explode('.', $this->getBasename());
-        array_pop($aExplodedFilename);
-        return sprintf(
-            '%s/%s',
-            $this->getParentPath(),
-            implode('.', $aExplodedFilename)
-        );
+        return self::removeExtension($this->getPath());
     }
 
     public function getBasenameWithoutExtension()
     {
-        $aExplodedFilename = explode('.', $this->getBasename());
-        array_pop($aExplodedFilename);
-        return implode('.', $aExplodedFilename);
+        return self::removeExtension($this->getBasename());
     }
 
     public function getSize()

@@ -1,6 +1,7 @@
 <?php
 namespace Asticode\FileManager\Entity;
 
+use Asticode\FileManager\Toolbox;
 use Asticode\Toolbox\ExtendedArray;
 use Asticode\FileManager\Enum\OrderField;
 
@@ -27,37 +28,27 @@ class File
 
     public function getParentPath()
     {
-        return dirname($this->sPath);
+        return Toolbox::getParentPath($this->sPath);
     }
 
     public function getBasename()
     {
-        return basename($this->sPath);
+        return Toolbox::getBasename($this->sPath);
     }
 
     public function getExtension()
     {
-        $aExplodedFilename = explode('.', $this->getBasename());
-        return count($aExplodedFilename) > 1 ? ExtendedArray::getLastValue($aExplodedFilename) : '';
-    }
-
-    public static function removeExtension($sInput)
-    {
-        $aExplodedInput = explode('.', $sInput);
-        if (count($aExplodedInput) > 1) {
-            array_pop($aExplodedInput);
-        }
-        return implode('.', $aExplodedInput);
+        return Toolbox::getExtension($this->sPath);
     }
 
     public function getPathWithoutExtension()
     {
-        return self::removeExtension($this->getPath());
+        return Toolbox::getPathWithoutExtension($this->sPath);
     }
 
     public function getBasenameWithoutExtension()
     {
-        return self::removeExtension($this->getBasename());
+        return Toolbox::getBasenameWithoutExtension($this->sPath);
     }
 
     public function getSize()

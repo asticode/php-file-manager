@@ -174,7 +174,7 @@ class FTPHandler extends AbstractHandler
         $oCurl = $this->curlInit();
 
         // Execute CURL
-        $sResponse = $this->curlExec($oCurl, '', ObjectType::DIRECTORY, 'LIST -a');
+        $sResponse = $this->curlExec($oCurl, $sPath, ObjectType::DIRECTORY, 'LIST -a');
 
         // Get files
         $aList = explode("\n", $sResponse);

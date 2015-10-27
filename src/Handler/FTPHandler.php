@@ -1,26 +1,25 @@
 <?php
 namespace Asticode\FileManager\Handler;
 
+use Asticode\FileManager\Enum\ObjectType;
 use Asticode\Toolbox\ExtendedArray;
 use Asticode\FileManager\Entity\CopyMethod;
 use Asticode\FileManager\Enum\Datasource;
 use Asticode\FileManager\Enum\OrderDirection;
 use Asticode\FileManager\Enum\OrderField;
 use Asticode\FileManager\Enum\WriteMethod;
+use Exception;
 use RuntimeException;
 
 class FTPHandler extends AbstractHandler
 {
     // Attributes
-    private $rHandle;
-    private $iLastConnectionTimestamp;
     private $aConfig;
 
     // Construct
     public function __construct(array $aConfig)
     {
         // Initialize
-        $this->rHandle = false;
         $this->aConfig = $aConfig;
 
         // Default values
@@ -40,6 +39,85 @@ class FTPHandler extends AbstractHandler
                 'host',
             ]
         );
+    }
+
+    private function curlInit()
+    {
+        // Initialize
+        $oCurl = curl_init();
+        curl_setopt($oCurl, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($oCurl, CURLOPT_PORT, $this->aConfig['port']);
+        curl_setopt($oCurl, CURLOPT_TIMEOUT, $this->aConfig['timeout']);
+        curl_setopt($oCurl, CURLOPT_CONNECTTIMEOUT, $this->aConfig['timeout']);
+
+        // Add user and password
+        if (isset($this->aConfig['username']) and isset($this->aConfig['password'])) {
+            curl_setopt($oCurl, CURLOPT_USERPWD, sprintf(
+                '%s:%s',
+                $this->aConfig['username'],
+                $this->aConfig['password']
+            ));
+        }
+
+        // Return
+        return $oCurl;
+    }
+
+    private function curlExec(
+        $oCurl,
+        $sPath,
+        $iObjectTypeId = ObjectType::FILE,
+        $sCustomRequest = '',
+        $aPostCommands = []
+    ) {
+        // Set URL
+        $sUrl = $this->getFullPath($sPath, $iObjectTypeId);
+        curl_setopt($oCurl, CURLOPT_URL, $sUrl);
+
+        // Set custom request
+        if ($sCustomRequest !== '') {
+            curl_setopt($oCurl, CURLOPT_CUSTOMREQUEST, $sCustomRequest);
+        }
+
+        // Set post quote
+        if ($aPostCommands !== []) {
+            curl_setopt($oCurl, CURLOPT_POSTQUOTE, $aPostCommands);
+        }
+
+        // Exec
+        $sResponse = curl_exec($oCurl);
+
+        // Failure
+        if (curl_errno($oCurl) > 0) {
+            throw new RuntimeException(sprintf(
+                'Error while executing "%s" on %s with curl error #%s and curl error message "%s"',
+                $sCustomRequest === '' ? implode('","', $aPostCommands) : $sCustomRequest,
+                $sUrl,
+                curl_errno($oCurl),
+                curl_error($oCurl)
+            ));
+        }
+
+        // Return
+        return $sResponse;
+    }
+
+    private function getFullPath($sPath, $iObjectType)
+    {
+        // Build path
+        $sPath = sprintf(
+            'ftp://%s%s',
+            $this->aConfig['host'],
+            $sPath
+        );
+
+        // Add trailing slash
+        if ($iObjectType === ObjectType::DIRECTORY) {
+            $sPath .= '/';
+        }
+
+        // Return
+        return $sPath;
     }
 
     public function getDatasource()
@@ -63,85 +141,8 @@ class FTPHandler extends AbstractHandler
         ];
     }
 
-    public function connect()
-    {
-        // Connect
-        if (!$this->rHandle || (time() - $this->iLastConnectionTimestamp) > $this->aConfig['timeout']) {
-            // Connect
-            $this->rHandle = ftp_connect(
-                $this->aConfig['host'],
-                $this->aConfig['port'],
-                $this->aConfig['timeout']
-            );
-
-            // Handle is not valid
-            if (!$this->rHandle) {
-                throw new RuntimeException(sprintf(
-                    'Error while executing ftp_connect to %s:%s with timeout %s',
-                    $this->aConfig['host'],
-                    $this->aConfig['port'],
-                    $this->aConfig['timeout']
-                ));
-            }
-
-            // Login
-            if (isset($this->aConfig['username']) and isset($this->aConfig['password'])) {
-                // Login
-                $bSuccess = ftp_login(
-                    $this->rHandle,
-                    $this->aConfig['username'],
-                    $this->aConfig['password']
-                );
-
-                // Failure
-                if (!$bSuccess) {
-                    throw new RuntimeException(sprintf(
-                        'Error while executing ftp_login with credentials %s:%s',
-                        $this->aConfig['username'],
-                        $this->aConfig['password']
-                    ));
-                }
-            }
-
-            // Passive mode
-            ftp_pasv($this->rHandle, true);
-
-            // Update last connection timestamp
-            $this->iLastConnectionTimestamp = time();
-        }
-    }
-
-    public function disconnect()
-    {
-        // Handle is set
-        if ($this->rHandle) {
-            // Close
-            $bSuccess = ftp_close($this->rHandle);
-
-            // Failure
-            if (!$bSuccess) {
-                throw new RuntimeException('Error while executing ftp_close');
-            }
-        }
-
-        // Update handle
-        $this->rHandle = false;
-    }
-
-    public function exists($sPath)
-    {
-        // Initialize
-        $this->connect();
-
-        // Parent exists
-        return parent::exists($sPath);
-    }
-
     public function metadata($sPath)
     {
-        // Initialize
-        $this->connect();
-
         // Get files
         $aFiles = $this->searchPattern(sprintf(
             '/^%s$/',
@@ -159,32 +160,6 @@ class FTPHandler extends AbstractHandler
         }
     }
 
-    public function createDir($sPath)
-    {
-        // Initialize
-        $this->connect();
-
-        // Mkdir
-        $bSuccess = ftp_mkdir($this->rHandle, $sPath);
-
-        // Failure
-        if (!$bSuccess) {
-            throw new RuntimeException(sprintf(
-                'Error while executing ftp_mkdir at %s',
-                $sPath
-            ));
-        }
-    }
-
-    public function createFile($sPath)
-    {
-        // Initialize
-        $this->connect();
-
-        // Write
-        $this->write('', $sPath);
-    }
-
     public function explore(
         $sPath,
         $iOrderField = OrderField::NONE,
@@ -193,19 +168,26 @@ class FTPHandler extends AbstractHandler
         array $aAllowedPatterns = []
     ) {
         // Initialize
-        $this->connect();
         $aFiles = [];
 
+        // Get CURL
+        $oCurl = $this->curlInit();
+
+        // Execute CURL
+        $sResponse = $this->curlExec($oCurl, '', ObjectType::DIRECTORY, 'LIST -a');
+
         // Get files
-        $aList = ftp_rawlist($this->rHandle, $sPath);
+        $aList = explode("\n", $sResponse);
 
         // Add file
         foreach ($aList as $sFile) {
-            // Initialize
-            $oFile = self::parseRawList($sFile, $sPath);
+            if ($sFile !== '') {
+                // Initialize
+                $oFile = self::parseRawList($sFile, $sPath);
 
-            // Filter file
-            $this->filterFile($aFiles, $oFile, $aAllowedExtensions, $aAllowedPatterns);
+                // Filter file
+                $this->filterFile($aFiles, $oFile, $aAllowedExtensions, $aAllowedPatterns);
+            }
         }
 
         // Order
@@ -215,55 +197,35 @@ class FTPHandler extends AbstractHandler
         return $aFiles;
     }
 
-    public function searchPattern($sPattern, $sPath)
+    public function createDir($sPath)
     {
-        // Initialize
-        $this->connect();
+        // Get CURL
+        $oCurl = $this->curlInit();
 
-        // Parent search pattern
-        return parent::searchPattern($sPattern, $sPath);
+        // Execute CURL
+        curl_setopt($oCurl, CURLOPT_FTP_CREATE_MISSING_DIRS, true);
+        $this->curlExec($oCurl, $sPath, ObjectType::DIRECTORY);
+    }
+
+    public function createFile($sPath)
+    {
+        // Write
+        $this->write('', $sPath);
     }
 
     public function write($sContent, $sPath, $iWriteMethod = WriteMethod::APPEND)
     {
-        // Initialize
-        $this->connect();
-
         // Create source path
         $sSourcePath = tempnam(sys_get_temp_dir(), 'asticode_filehandler_');
         file_put_contents($sSourcePath, $sContent);
 
-        // Get start position
-        if ($iWriteMethod === WriteMethod::APPEND) {
-            // Get remote file content length
-            try {
-                $iStartPosition = strlen($this->read($sPath));
-            } catch (RuntimeException $oException) {
-                $iStartPosition = 0;
-            }
-        } else {
-            $iStartPosition = 0;
-        }
-
-        try {
-            // Upload
-            $this->upload($sPath, $sSourcePath, $iStartPosition);
-
-            // Remove temp file
-            unlink($sSourcePath);
-        } catch (RuntimeException $oException) {
-            // Remove temp file
-            unlink($sSourcePath);
-
-            // Throw exception
-            throw $oException;
-        }
+        // Upload
+        $this->upload($sSourcePath, $sPath);
     }
 
     public function read($sPath)
     {
         // Initialize
-        $this->connect();
         $sTargetPath = tempnam(sys_get_temp_dir(), 'asticode_filehandler_');
 
         // Download
@@ -281,73 +243,87 @@ class FTPHandler extends AbstractHandler
 
     public function rename($sSourcePath, $sTargetPath)
     {
-        // Initialize
-        $this->connect();
+        // Get CURL
+        $oCurl = $this->curlInit();
 
-        // Delete
-        $bSuccess = ftp_rename($this->rHandle, $sSourcePath, $sTargetPath);
-
-        // Failure
-        if (!$bSuccess) {
-            throw new RuntimeException(sprintf(
-                'Error while executing ftp_rename from %s to %s',
-                $sSourcePath,
-                $sTargetPath
-            ));
-        }
-    }
-
-    public function delete($sPath)
-    {
-        // Initialize
-        $this->connect();
-
-        // Delete
-        $bSuccess = ftp_delete($this->rHandle, $sPath);
-
-        // Failure
-        if (!$bSuccess) {
-            throw new RuntimeException(sprintf(
-                'Error while executing ftp_delete on %s',
-                $sPath
-            ));
-        }
+        // Execute CURL
+        $this->curlExec(
+            $oCurl,
+            '',
+            ObjectType::FILE,
+            '',
+            [
+                sprintf('RNFR %s', $sSourcePath),
+                sprintf('RNTO %s', $sTargetPath),
+            ]
+        );
     }
 
     public function download($sSourcePath, $sTargetPath)
     {
         // Initialize
-        $this->connect();
+        $oFile = fopen($sTargetPath, 'w');
 
-        // Delete
-        $bSuccess = ftp_get($this->rHandle, $sTargetPath, $sSourcePath, FTP_BINARY);
+        // Get CURL
+        $oCurl = $this->curlInit();
 
-        // Failure
-        if (!$bSuccess) {
-            throw new RuntimeException(sprintf(
-                'Error while executing ftp_get from %s to %s',
-                $sSourcePath,
-                $sTargetPath
-            ));
+        // Download
+        curl_setopt($oCurl, CURLOPT_FILE, $oFile);
+        try {
+            $this->curlExec($oCurl, $sSourcePath);
+        } catch (Exception $oException) {
+            // Close file
+            fclose($oFile);
+
+            // Throw
+            throw $oException;
         }
+
+        // Close file
+        fclose($oFile);
     }
 
-    public function upload($sSourcePath, $sTargetPath, $iStartPosition = 0)
+    public function upload($sSourcePath, $sTargetPath)
     {
         // Initialize
-        $this->connect();
+        $oFile = fopen($sSourcePath, 'r');
 
-        // Delete
-        $bSuccess = ftp_put($this->rHandle, $sTargetPath, $sSourcePath, FTP_BINARY, $iStartPosition);
+        // Get CURL
+        $oCurl = $this->curlInit();
 
-        // Failure
-        if (!$bSuccess) {
-            throw new RuntimeException(sprintf(
-                'Error while executing ftp_put from %s to %s',
-                $sSourcePath,
-                $sTargetPath
-            ));
+        // Download
+        curl_setopt($oCurl, CURLOPT_UPLOAD, true);
+        curl_setopt($oCurl, CURLOPT_INFILE, $oFile);
+        curl_setopt($oCurl, CURLOPT_INFILESIZE, filesize($sSourcePath));
+        try {
+            $this->curlExec($oCurl, $sTargetPath);
+        } catch (Exception $oException) {
+            // Close file
+            fclose($oFile);
+
+            // Throw
+            throw $oException;
         }
+
+        // Close file
+        fclose($oFile);
+    }
+
+    public function delete($sPath)
+    {
+        // Get CURL
+        $oCurl = $this->curlInit();
+
+        // Execute CURL
+        $this->curlExec(
+            $oCurl,
+            '',
+            ObjectType::FILE,
+            '',
+            [
+                sprintf('DELE %s', $sPath),
+            ]
+        );
     }
 
 }

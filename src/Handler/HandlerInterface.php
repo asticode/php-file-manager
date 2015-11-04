@@ -41,12 +41,12 @@ interface HandlerInterface
     public function createFile($sPath);
 
     /**
-     * @param string $sPath
+     * @param $sPath
      * @param int $iOrderField
      * @param int $iOrderDirection
      * @param array $aAllowedExtensions
-     * @param array $sPattern
-     * @return array
+     * @param array $aAllowedPatterns
+     * @return mixed
      */
     public function explore(
         $sPath,

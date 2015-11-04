@@ -157,7 +157,8 @@ class FileManager
         $sPath,
         $iOrderField = OrderField::NONE,
         $iOrderDirection = OrderDirection::ASC,
-        array $aAllowedExtensions = []
+        array $aAllowedExtensions = [],
+        array $aAllowedPatterns = []
     ) {
         // Parse path
         /** @var $oHandler \Asticode\FileManager\Handler\HandlerInterface */
@@ -169,7 +170,8 @@ class FileManager
             $sPath,
             $iOrderField,
             $iOrderDirection,
-            $aAllowedExtensions
+            $aAllowedExtensions,
+            $aAllowedPatterns
         );
     }
 

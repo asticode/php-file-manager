@@ -174,7 +174,7 @@ class UNIXHandler extends AbstractHandler
         $this->exec(sprintf(
             'mv \'%s\' \'%s\'',
             $this->escapeSingleQuotes($sSourcePath),
-            $this->escapeSingleQuotes($sSourcePath)
+            $this->escapeSingleQuotes($sTargetPath)
         ));
     }
 

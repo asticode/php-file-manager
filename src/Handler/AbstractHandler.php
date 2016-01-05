@@ -9,6 +9,11 @@ use RuntimeException;
 abstract class AbstractHandler implements HandlerInterface
 {
 
+    private static $aDateFormats = [
+        'F d H:i',
+        'F d Y'
+    ];
+
     public function getCopyMethods()
     {
         return [];
@@ -17,6 +22,7 @@ abstract class AbstractHandler implements HandlerInterface
     protected static function parseRawList($sFile, $sPath)
     {
         // UNIX => drwxr-xr-x 2 zmifwezd zmifwezd 4096 Sep 22 14:45 .
+        // UNIX (2) => drwxr-xr-x 2 zmifwezd zmifwezd 4096 Sep 22 2015 .
         // OSX  => drwxr-xr-x 2 zmifwezd zmifwezd 4096 22 sep 14:45 .
         // Split file
         $aExplodedRawListOutput = preg_split('/\s+/', $sFile);
@@ -39,14 +45,22 @@ abstract class AbstractHandler implements HandlerInterface
             $sDay = $sTemp;
         }
 
-        // Get modification date
+        // Get modification date as a string
         $sModificationDate = sprintf(
             '%s %s %s',
             $sMonth,
             $sDay,
             $sTime
         );
-        $oModificationDate = \DateTime::createFromFormat('F d H:i', $sModificationDate);
+
+        // Create modification date as an object
+        $oModificationDate = false;
+        foreach (self::$aDateFormats as $sDateFormat) {
+            $oModificationDate = \DateTime::createFromFormat($sDateFormat, $sModificationDate);
+            if ($oModificationDate) {
+                break;
+            }
+        }
 
         // Modification date is valid
         if (!$oModificationDate) {

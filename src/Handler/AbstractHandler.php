@@ -11,7 +11,8 @@ abstract class AbstractHandler implements HandlerInterface
 
     private static $aDateFormats = [
         'F d H:i',
-        'F d Y'
+        'F d Y',
+        'd F H:i',
     ];
 
     public function getCopyMethods()
@@ -24,33 +25,18 @@ abstract class AbstractHandler implements HandlerInterface
         // UNIX => drwxr-xr-x 2 zmifwezd zmifwezd 4096 Sep 22 14:45 .
         // UNIX (2) => drwxr-xr-x 2 zmifwezd zmifwezd 4096 Sep 22 2015 .
         // OSX  => drwxr-xr-x 2 zmifwezd zmifwezd 4096 22 sep 14:45 .
-        // Split file
-        $aExplodedRawListOutput = preg_split('/\s+/', $sFile);
-
-        // Exploded is valid
-        if (!isset($aExplodedRawListOutput[8])) {
-            throw new RuntimeException(sprintf(
-                'Unparseable raw list output %s',
-                $sFile
-            ));
-        }
-
-        // Parse raw list output
-        list($sRights, $iNumber, $sUser, $sGroup, $iSize, $sMonth, $sDay, $sTime, $sName) = $aExplodedRawListOutput;
-
-        // Switch month and day for OSX
-        if (intval($sDay) === 0) {
-            $sTemp = $sMonth;
-            $sMonth = $sDay;
-            $sDay = $sTemp;
-        }
+        list($sRights, $iNumber, $sUser, $sGroup, $iSize, $sDateItem1, $sDateItem2, $sDateItem3, $sName) = array_pad(
+            preg_split('/\s+/', $sFile),
+            9,
+            ''
+        );
 
         // Get modification date as a string
         $sModificationDate = sprintf(
             '%s %s %s',
-            $sMonth,
-            $sDay,
-            $sTime
+            $sDateItem1,
+            $sDateItem2,
+            $sDateItem3
         );
 
         // Create modification date as an object

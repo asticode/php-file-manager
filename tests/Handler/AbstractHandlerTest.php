@@ -36,11 +36,11 @@ class AbstractHandlerTest extends PHPUnit_Framework_TestCase
         );
 
         // Assert
-        $this->assertEquals($oFile1->getPath(), '/tmp/name');
-        $this->assertEquals($oFile1->getModificationDate()->getTimestamp(), $oDateHour->getTimestamp());
-        $this->assertEquals($oFile2->getPath(), '/tmp/name');
-        $this->assertEquals($oFile2->getModificationDate()->getTimestamp(), $oDateYear->getTimestamp());
-        $this->assertEquals($oFile3->getPath(), '/tmp/name');
-        $this->assertEquals($oFile3->getModificationDate()->getTimestamp(), $oDateHour->getTimestamp());
+        $this->assertEquals('/tmp/name', $oFile1->getPath());
+        $this->assertEquals($oDateHour->getTimestamp(), $oFile1->getModificationDate()->getTimestamp());
+        $this->assertEquals('/tmp/name', $oFile2->getPath());
+        $this->assertEquals($oDateYear->getTimestamp(), $oFile2->getModificationDate()->getTimestamp());
+        $this->assertEquals('/tmp/name', $oFile3->getPath());
+        $this->assertEquals($oDateHour->getTimestamp(), $oFile3->getModificationDate()->getTimestamp());
     }
 }

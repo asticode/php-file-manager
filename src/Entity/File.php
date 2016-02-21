@@ -67,11 +67,11 @@ class File
             case OrderField::MODIFICATION_DATE:
                 return $this->getModificationDate()->getTimestamp();
                 break;
-            case OrderField::BASENAME:
-                return $this->getBasename();
-                break;
             case OrderField::SIZE:
                 return $this->getSize();
+                break;
+            default:
+                return $this->getBasename();
                 break;
         }
     }

@@ -7,6 +7,7 @@ use Asticode\FileManager\Enum\Datasource;
 use Asticode\FileManager\Enum\OrderDirection;
 use Asticode\FileManager\Enum\OrderField;
 use Asticode\FileManager\Enum\WriteMethod;
+use Asticode\FileManager\Toolbox;
 use RuntimeException;
 
 class PHPHandler extends AbstractHandler
@@ -80,7 +81,7 @@ class PHPHandler extends AbstractHandler
         $iOrderField = OrderField::NONE,
         $iOrderDirection = OrderDirection::ASC,
         array $aAllowedExtensions = [],
-        array $aAllowedPatterns = []
+        array $aAllowedBasenamePatterns = []
     ) {
         // Initialize
         $aFiles = [];
@@ -97,19 +98,19 @@ class PHPHandler extends AbstractHandler
 
         // Add file
         foreach ($aList as $sBasename) {
-            // Initialize
+            // Create file
             $oFile = $this->metadata(sprintf(
                 '%s/%s',
                 $sPath,
                 $sBasename
             ));
 
-            // Filter file
-            $this->filterFile($aFiles, $oFile, $aAllowedExtensions, $aAllowedPatterns);
+            // Add file
+            Toolbox::addFile($aFiles, $oFile, $aAllowedExtensions, $aAllowedBasenamePatterns);
         }
 
         // Order
-        $this->sortFiles($aFiles, $iOrderField, $iOrderDirection);
+        Toolbox::sortFiles($aFiles, $iOrderField, $iOrderDirection);
 
         // Return
         return $aFiles;

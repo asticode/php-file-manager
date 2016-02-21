@@ -1,6 +1,7 @@
 <?php
 namespace Asticode\FileManager\Handler;
 
+use Asticode\FileManager\Toolbox;
 use Asticode\Toolbox\ExtendedArray;
 use Asticode\Toolbox\ExtendedString;
 use Asticode\FileManager\Entity\CopyMethod;
@@ -83,7 +84,7 @@ class UNIXHandler extends AbstractHandler
         ));
 
         // Return
-        return $this->parseRawList(isset($aOutputArray[0]) ? $aOutputArray[0] : '', dirname($sPath));
+        return Toolbox::parseRawList(isset($aOutputArray[0]) ? $aOutputArray[0] : '', dirname($sPath));
     }
 
     public function createDir($sPath)
@@ -109,7 +110,7 @@ class UNIXHandler extends AbstractHandler
         $iOrderField = OrderField::NONE,
         $iOrderDirection = OrderDirection::ASC,
         array $aAllowedExtensions = [],
-        array $aAllowedPatterns = []
+        array $aAllowedBasenamePatterns = []
     ) {
         // Initialize
         $aFiles = [];
@@ -128,14 +129,14 @@ class UNIXHandler extends AbstractHandler
         // Add file
         foreach ($aList as $sFile) {
             // Initialize
-            $oFile = self::parseRawList($sFile, $sPath);
+            $oFile = Toolbox::parseRawList($sFile, $sPath);
 
-            // Filter file
-            $this->filterFile($aFiles, $oFile, $aAllowedExtensions, $aAllowedPatterns);
+            // Add file
+            Toolbox::addFile($aFiles, $oFile, $aAllowedExtensions, $aAllowedBasenamePatterns);
         }
 
         // Order
-        $this->sortFiles($aFiles, $iOrderField, $iOrderDirection);
+        Toolbox::sortFiles($aFiles, $iOrderField, $iOrderDirection);
 
         // Return
         return $aFiles;

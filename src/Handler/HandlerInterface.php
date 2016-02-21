@@ -45,7 +45,7 @@ interface HandlerInterface
      * @param int $iOrderField
      * @param int $iOrderDirection
      * @param array $aAllowedExtensions
-     * @param array $aAllowedPatterns
+     * @param array $aAllowedBasenamePatterns
      * @return mixed
      */
     public function explore(
@@ -53,7 +53,7 @@ interface HandlerInterface
         $iOrderField = OrderField::NONE,
         $iOrderDirection = OrderDirection::ASC,
         array $aAllowedExtensions = [],
-        array $aAllowedPatterns = []
+        array $aAllowedBasenamePatterns = []
     );
 
     /**

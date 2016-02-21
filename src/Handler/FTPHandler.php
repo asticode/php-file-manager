@@ -2,6 +2,7 @@
 namespace Asticode\FileManager\Handler;
 
 use Asticode\FileManager\Enum\ObjectType;
+use Asticode\FileManager\Toolbox;
 use Asticode\Toolbox\ExtendedArray;
 use Asticode\FileManager\Entity\CopyMethod;
 use Asticode\FileManager\Enum\Datasource;
@@ -165,7 +166,7 @@ class FTPHandler extends AbstractHandler
         $iOrderField = OrderField::NONE,
         $iOrderDirection = OrderDirection::ASC,
         array $aAllowedExtensions = [],
-        array $aAllowedPatterns = []
+        array $aAllowedBasenamePatterns = []
     ) {
         // Initialize
         $aFiles = [];
@@ -183,15 +184,15 @@ class FTPHandler extends AbstractHandler
         foreach ($aList as $sFile) {
             if ($sFile !== '') {
                 // Initialize
-                $oFile = self::parseRawList($sFile, $sPath);
+                $oFile = Toolbox::parseRawList($sFile, $sPath);
 
-                // Filter file
-                $this->filterFile($aFiles, $oFile, $aAllowedExtensions, $aAllowedPatterns);
+                // Add file
+                Toolbox::addFile($aFiles, $oFile, $aAllowedExtensions, $aAllowedBasenamePatterns);
             }
         }
 
         // Order
-        $this->sortFiles($aFiles, $iOrderField, $iOrderDirection);
+        Toolbox::sortFiles($aFiles, $iOrderField, $iOrderDirection);
 
         // Return
         return $aFiles;

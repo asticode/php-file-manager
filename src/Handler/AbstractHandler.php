@@ -1,139 +1,14 @@
 <?php
 namespace Asticode\FileManager\Handler;
 
-use Asticode\FileManager\Entity\File;
-use Asticode\FileManager\Enum\OrderDirection;
-use Asticode\FileManager\Enum\OrderField;
 use RuntimeException;
 
 abstract class AbstractHandler implements HandlerInterface
 {
 
-    private static $aDateFormats = [
-        'F d H:i',
-        'F d Y',
-        'd F H:i',
-    ];
-
     public function getCopyMethods()
     {
         return [];
-    }
-
-    protected static function parseRawList($sFile, $sPath)
-    {
-        // UNIX => drwxr-xr-x 2 zmifwezd zmifwezd 4096 Sep 22 14:45 .
-        // UNIX (2) => drwxr-xr-x 2 zmifwezd zmifwezd 4096 Sep 22 2015 .
-        // OSX  => drwxr-xr-x 2 zmifwezd zmifwezd 4096 22 sep 14:45 .
-        list($sRights, $iNumber, $sUser, $sGroup, $iSize, $sDateItem1, $sDateItem2, $sDateItem3, $sName) = array_pad(
-            preg_split('/\s+/', $sFile),
-            9,
-            ''
-        );
-
-        // Get modification date as a string
-        $sModificationDate = sprintf(
-            '%s %s %s',
-            $sDateItem1,
-            $sDateItem2,
-            $sDateItem3
-        );
-
-        // Create modification date as an object
-        $oModificationDate = false;
-        foreach (self::$aDateFormats as $sDateFormat) {
-            $oModificationDate = \DateTime::createFromFormat($sDateFormat, $sModificationDate);
-            if ($oModificationDate) {
-                break;
-            }
-        }
-
-        // Modification date is valid
-        if (!$oModificationDate) {
-            throw new RuntimeException(sprintf(
-                'Unparseable modification date %s',
-                $sModificationDate
-            ));
-        }
-
-        // Return
-        return new File(
-            sprintf(
-                '%s/%s',
-                $sPath,
-                $sName
-            ),
-            $iSize,
-            $oModificationDate
-        );
-    }
-
-    protected function sortFiles(array &$aFiles, $iOrderField, $iOrderDirection)
-    {
-        if ($iOrderField !== OrderField::NONE) {
-            // Initialize
-            $aFilesToSort = [];
-
-            // Loop through files
-            /** @var $oFile \Asticode\FileManager\Entity\File */
-            foreach ($aFiles as $oFile) {
-                // Get key
-                $sKey = $oFile->getOrderField($iOrderField);
-
-                if (!isset($aFilesToSort[$sKey])) {
-                    $aFilesToSort[$sKey] = [];
-                }
-
-                $aFilesToSort[$sKey][$oFile->getPath()] = $oFile;
-            }
-
-            // Sort
-            if ($iOrderDirection === OrderDirection::ASC) {
-                ksort($aFilesToSort);
-            } else {
-                krsort($aFilesToSort);
-            }
-
-            // Recreate files
-            $aFiles = [];
-            foreach ($aFilesToSort as $aFilesToSortWithSameKey) {
-                $aFiles = array_merge($aFiles, array_values($aFilesToSortWithSameKey));
-            }
-        }
-    }
-
-    protected function filterFile(array &$aFiles, File $oFile, array $aAllowedExtensions, array $aAllowedPatterns)
-    {
-        // Do not process . and ..
-        if (in_array($oFile->getBasename(), ['.', '..'])) {
-            return;
-        }
-
-        // Filter allowed extensions
-        if ($aAllowedExtensions !== [] and !in_array($oFile->getExtension(), $aAllowedExtensions)) {
-            return;
-        }
-
-        // Filter allowed patterns
-        if ($aAllowedPatterns !== []) {
-            // Initialize
-            $bIsValid = false;
-
-            // Loop through allowed patterns
-            foreach ($aAllowedPatterns as $sAllowedPattern) {
-                if (preg_match(sprintf('/%s/', $sAllowedPattern), $oFile->getBasename()) > 0) {
-                    $bIsValid = true;
-                }
-            }
-
-            // Invalid
-            if (!$bIsValid) {
-                return;
-            }
-        }
-
-        // Add file
-        $aFiles[] = $oFile;
     }
 
     public function exists($sPath)

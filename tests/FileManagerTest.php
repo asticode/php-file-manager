@@ -19,5 +19,6 @@ class FileManagerTest extends PHPUnit_Framework_TestCase
         $oCopyMethods = $oFileManager->chooseBestCopyMethods($oFileManager->getHandler("ftp"), $oFileManager->getHandler("ftp"));
         $this->assertEquals(Datasource::FTP, $oCopyMethods[0]->getSourceDatasource());
         $this->assertEquals(Datasource::FTP, $oCopyMethods[1]->getTargetDatasource());
+        var_dump($oFileManager);
     }
 }

@@ -1,6 +1,9 @@
 <?php
 namespace Asticode\FileManager;
 
+use Asticode\FileManager\Entity\CopyMethod;
+use Asticode\FileManager\Entity\Vertex;
+use Asticode\FileManager\Enum\Datasource;
 use Asticode\Toolbox\ExtendedArray;
 use Asticode\Toolbox\ExtendedString;
 use Asticode\FileManager\Enum\OrderDirection;
@@ -8,6 +11,7 @@ use Asticode\FileManager\Enum\OrderField;
 use Asticode\FileManager\Enum\WriteMethod;
 use Asticode\FileManager\Handler\HandlerInterface;
 use RuntimeException;
+use SplDoublyLinkedList;
 
 class FileManager
 {
@@ -254,9 +258,20 @@ class FileManager
         }
 
         // Loop through copy methods
-        /** @var $oCopyMethod \Asticode\FileManager\Entity\CopyMethod */
-        foreach ($aCopyMethods as $oCopyMethod) {
-            call_user_func_array($oCopyMethod->getCallable(), [$sSourcePath, $sTargetPath]);
+        if (count($aCopyMethods) === 1) {
+            call_user_func_array($aCopyMethods[0]->getCallable(), [$sSourcePath, $sTargetPath]);
+        } elseif (count($aCopyMethods) === 2 && $aCopyMethods[0]->getTargetDatasource() === Datasource::LOCAL) {
+            $sTempPath = tempnam(sys_get_temp_dir(), "file_manager_");
+            call_user_func_array($aCopyMethods[0]->getCallable(), [$sSourcePath, $sTempPath]);
+            call_user_func_array($aCopyMethods[1]->getCallable(), [$sTempPath, $sTargetPath]);
+            unlink($sTempPath);
+        } else {
+            throw new RuntimeException(sprintf(
+                "Couldn't copy %s to %s using %d copy methods",
+                $sSourcePath,
+                $sTargetPath,
+                count($aCopyMethods)
+            ));
         }
     }
 
@@ -269,21 +284,65 @@ class FileManager
         $this->delete($sSourcePath);
     }
 
-    private function chooseBestCopyMethods(HandlerInterface $oSourceHandler, HandlerInterface $oTargetHandler)
+    public function chooseBestCopyMethods(HandlerInterface $oSourceHandler, HandlerInterface $oTargetHandler)
     {
-        // Initialize
-        $aCopyMethods = [];
+        // Get start vertex
+        $oVertexStart = new Vertex($oSourceHandler->getDatasource());
+        $oVertexStart->setVisited(true);
+        $oVertexStart->setDistance(0);
 
-        // Loop through file handler copy methods
-        /** @var $oCopyMethod \Asticode\FileManager\Entity\CopyMethod */
-        foreach ($this->aCopyMethods as $oCopyMethod) {
-            if ($oCopyMethod->getSourceDatasource() === $oSourceHandler->getDatasource()
-                and $oCopyMethod->getTargetDatasource() === $oTargetHandler->getDatasource()) {
-                $aCopyMethods = [$oCopyMethod];
+        // Compute paths
+        $aQueue = [$oVertexStart];
+        $aVertexes = [];
+        while ($aQueue) {
+            // Get last vertex from the queue
+            /** @var Vertex $oLastVertexFromQueue */
+            $oLastVertexFromQueue = array_pop($aQueue);
+
+            // Find appropriate copy methods
+            /** @var CopyMethod $oCopyMethod */
+            foreach ($this->aCopyMethods as $oCopyMethod) {
+                // Copy method is appropriate
+                if ($oCopyMethod->getSourceDatasource() === $oLastVertexFromQueue->getDatasource()) {
+                    // Loop through copy method vertexes
+                    while ($oCopyMethod->getDoublyLinkedList()->valid()) {
+                        /** @var Vertex $oCurrentVertex */
+                        $oCurrentVertex = $oCopyMethod->getDoublyLinkedList()->current();
+                        if (!$oCurrentVertex->isVisited()) {
+                            $oCurrentVertex->setVisited(true);
+                            $oVertex = clone $oCurrentVertex;
+                            $oVertex->setDistance($oLastVertexFromQueue->getDistance() + 1);
+                            $aPath = $oLastVertexFromQueue->getPath();
+                            array_push($aPath, $oCopyMethod);
+                            $oVertex->setPath($aPath);
+                            array_push($aQueue, $oVertex);
+                            array_push($aVertexes, $oVertex);
+                        }
+                        $oCopyMethod->getDoublyLinkedList()->next();
+                    }
+                }
+            }
+        }
+
+        // Look for shortest path
+        $oShortestPath = [];
+        $iMinPathDistance = -1;
+        /** @var Vertex $oVertex */
+        foreach ($aVertexes as $oVertex) {
+            /** @var CopyMethod $oFirstCopyMethod */
+            $oFirstCopyMethod = $oVertex->getPath()[0];
+            /** @var CopyMethod $oLastCopyMethod */
+            $oLastCopyMethod = $oVertex->getPath()[count($oVertex->getPath()) - 1];
+
+            // Valid path
+            if ($oFirstCopyMethod->getSourceDatasource() === $oSourceHandler->getDatasource()
+                && $oLastCopyMethod->getTargetDatasource() === $oTargetHandler->getDatasource()
+                && ($iMinPathDistance === -1 || $iMinPathDistance > $oVertex->getDistance())) {
+                $oShortestPath = $oVertex->getPath();
             }
         }
 
         // Return
-        return $aCopyMethods;
+        return $oShortestPath;
     }
 }

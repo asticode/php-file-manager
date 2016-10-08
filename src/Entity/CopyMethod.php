@@ -1,12 +1,15 @@
 <?php
 namespace Asticode\FileManager\Entity;
 
+use SplDoublyLinkedList;
+
 class CopyMethod
 {
     // Attributes
     private $iSourceDatasource;
     private $iTargetDatasource;
     private $aCallable;
+    private $lDoublyLinkedList;
 
     // Construct
     public function __construct($iSourceDatasource, $iTargetDatasource, array $aCallable)
@@ -15,6 +18,10 @@ class CopyMethod
         $this->iSourceDatasource = $iSourceDatasource;
         $this->iTargetDatasource = $iTargetDatasource;
         $this->aCallable = $aCallable;
+        $this->lDoublyLinkedList = new SplDoublyLinkedList();
+        $this->lDoublyLinkedList->push(new Vertex($iSourceDatasource));
+        $this->lDoublyLinkedList->push(new Vertex($iTargetDatasource));
+        $this->lDoublyLinkedList->rewind();
     }
 
     public function getSourceDatasource()
@@ -30,5 +37,10 @@ class CopyMethod
     public function getCallable()
     {
         return $this->aCallable;
+    }
+
+    public function getDoublyLinkedList()
+    {
+        return $this->lDoublyLinkedList;
     }
 }

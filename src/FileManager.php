@@ -292,6 +292,7 @@ class FileManager
         $oVertexStart->setDistance(0);
 
         // Clone copy methods
+        /** @var CopyMethod $oCopyMethod */
         $aCopyMethods = [];
         foreach ($this->aCopyMethods as $oCopyMethod) {
             $aCopyMethods[] = clone $oCopyMethod;
@@ -306,7 +307,6 @@ class FileManager
             $oLastVertexFromQueue = array_pop($aQueue);
 
             // Find appropriate copy methods
-            /** @var CopyMethod $oCopyMethod */
             foreach ($aCopyMethods as $oCopyMethod) {
                 // Copy method is appropriate
                 if ($oCopyMethod->getSourceDatasource() === $oLastVertexFromQueue->getDatasource()) {

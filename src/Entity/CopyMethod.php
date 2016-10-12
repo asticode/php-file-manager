@@ -24,6 +24,18 @@ class CopyMethod
         $this->lDoublyLinkedList->rewind();
     }
 
+    public function __clone()
+    {
+        $lDoublyLinkedList = new SplDoublyLinkedList();
+        $this->lDoublyLinkedList->rewind();
+        while ($this->lDoublyLinkedList->valid()) {
+            $lDoublyLinkedList->push(clone $this->lDoublyLinkedList->current());
+            $this->lDoublyLinkedList->next();
+        }
+        $lDoublyLinkedList->rewind();
+        $this->lDoublyLinkedList = $lDoublyLinkedList;
+    }
+
     public function getSourceDatasource()
     {
         return $this->iSourceDatasource;

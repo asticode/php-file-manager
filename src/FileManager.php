@@ -295,7 +295,14 @@ class FileManager
         /** @var CopyMethod $oCopyMethod */
         $aCopyMethods = [];
         foreach ($this->aCopyMethods as $oCopyMethod) {
+            // Clone
             $aCopyMethods[] = clone $oCopyMethod;
+
+            // Check whether this copy method is sufficient
+            if ($oCopyMethod->getSourceDatasource() === $oSourceHandler->getDatasource()
+                && $oCopyMethod->getTargetDatasource() === $oTargetHandler->getDatasource()) {
+                return [$oCopyMethod];
+            }
         }
 
         // Compute paths

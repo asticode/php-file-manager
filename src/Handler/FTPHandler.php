@@ -139,6 +139,11 @@ class FTPHandler extends AbstractHandler
                 Datasource::FTP,
                 [$this, 'upload']
             ),
+            new CopyMethod(
+                Datasource::FTP,
+                Datasource::FTP,
+                [$this, 'rename']
+            ),
         ];
     }
 

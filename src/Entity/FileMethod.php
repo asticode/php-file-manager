@@ -3,7 +3,7 @@ namespace Asticode\FileManager\Entity;
 
 use SplDoublyLinkedList;
 
-class CopyMethod
+class FileMethod
 {
     // Attributes
     private $iSourceDatasource;

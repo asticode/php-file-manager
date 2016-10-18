@@ -1,7 +1,7 @@
 <?php
 namespace Asticode\FileManager\Handler;
 
-use Asticode\FileManager\Entity\CopyMethod;
+use Asticode\FileManager\Entity\FileMethod;
 use Asticode\FileManager\Entity\File;
 use Asticode\FileManager\Enum\Datasource;
 use Asticode\FileManager\Enum\OrderDirection;
@@ -30,10 +30,21 @@ class PHPHandler extends AbstractHandler
     public function getCopyMethods()
     {
         return [
-            new CopyMethod(
+            new FileMethod(
                 Datasource::LOCAL,
                 Datasource::LOCAL,
                 [$this, 'copy']
+            ),
+        ];
+    }
+
+    public function getMoveMethods()
+    {
+        return [
+            new FileMethod(
+                Datasource::LOCAL,
+                Datasource::LOCAL,
+                [$this, 'rename']
             ),
         ];
     }

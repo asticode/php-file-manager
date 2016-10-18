@@ -19,6 +19,11 @@ interface HandlerInterface
     public function getCopyMethods();
 
     /**
+     * @return array
+     */
+    public function getMoveMethods();
+
+    /**
      * @param string $sPath
      * @return boolean
      */

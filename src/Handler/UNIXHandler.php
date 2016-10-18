@@ -4,13 +4,12 @@ namespace Asticode\FileManager\Handler;
 use Asticode\FileManager\Toolbox;
 use Asticode\Toolbox\ExtendedArray;
 use Asticode\Toolbox\ExtendedString;
-use Asticode\FileManager\Entity\CopyMethod;
+use Asticode\FileManager\Entity\FileMethod;
 use Asticode\FileManager\Enum\Datasource;
 use Asticode\FileManager\Enum\OrderDirection;
 use Asticode\FileManager\Enum\OrderField;
 use Asticode\FileManager\Enum\WriteMethod;
 use Asticode\Toolbox\ExtendedShell;
-use RuntimeException;
 
 class UNIXHandler extends AbstractHandler
 {
@@ -48,10 +47,21 @@ class UNIXHandler extends AbstractHandler
     public function getCopyMethods()
     {
         return [
-            new CopyMethod(
+            new FileMethod(
                 Datasource::LOCAL,
                 Datasource::LOCAL,
                 [$this, 'copy']
+            ),
+        ];
+    }
+
+    public function getMoveMethods()
+    {
+        return [
+            new FileMethod(
+                Datasource::LOCAL,
+                Datasource::LOCAL,
+                [$this, 'rename']
             ),
         ];
     }

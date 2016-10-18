@@ -4,7 +4,7 @@ namespace Asticode\FileManager\Handler;
 use Asticode\FileManager\Enum\ObjectType;
 use Asticode\FileManager\Toolbox;
 use Asticode\Toolbox\ExtendedArray;
-use Asticode\FileManager\Entity\CopyMethod;
+use Asticode\FileManager\Entity\FileMethod;
 use Asticode\FileManager\Enum\Datasource;
 use Asticode\FileManager\Enum\OrderDirection;
 use Asticode\FileManager\Enum\OrderField;
@@ -129,17 +129,23 @@ class FTPHandler extends AbstractHandler
     public function getCopyMethods()
     {
         return [
-            new CopyMethod(
+            new FileMethod(
                 Datasource::FTP,
                 Datasource::LOCAL,
                 [$this, 'download']
             ),
-            new CopyMethod(
+            new FileMethod(
                 Datasource::LOCAL,
                 Datasource::FTP,
                 [$this, 'upload']
             ),
-            new CopyMethod(
+        ];
+    }
+
+    public function getMoveMethods()
+    {
+        return [
+            new FileMethod(
                 Datasource::FTP,
                 Datasource::FTP,
                 [$this, 'rename']
